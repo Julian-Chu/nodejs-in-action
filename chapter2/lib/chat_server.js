@@ -73,6 +73,29 @@ function handleNameChangeAttempts(socket, nickNames, namesUsed) {
   })
 }
 
+function handleMessageBroadcasting(socket){
+  socket.on('message', function(message){
+    socket.broadcast.to(message.room).emit('message',{
+      text: nickNames[socket.id] + ': ' + message.text 
+    });
+  });
+}
+
+function handleRoomJoining(socket){
+  socket.on('join', function(room){
+    socket.leave(currentRoom[socket.id]);
+    joinRoom(socket, room.newRoom);
+  })
+}
+
+function handleClientDisconnection(socket){
+  socket.on('disconnect', function(){
+    var nameIndex = namesUsed.indexOf(nickNames[socket.id]);
+    namesUsed.splice(nameIndex, 1);
+    nickNames.splice(socket.id, 1);
+  })
+}
+
 exports.listen = function(server) {
   io = socketio.listen(server);
   io.set('log level', 1);
