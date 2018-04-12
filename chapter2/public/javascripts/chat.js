@@ -22,7 +22,7 @@ Chat.prototype.processCommand = function(command){
                   .substring(1, words[0].length)
                   .toLowerCase();
   var message = false;
-
+debugger;
   switch(command){
     case 'join':
       words.shift();

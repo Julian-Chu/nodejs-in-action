@@ -6,6 +6,7 @@ var namesUsed = [];
 var currentRoom = {};
 
 function assignGuestName(socket, guestNumber, nickNames, namesUsed) {
+  debugger;
   var name = 'Guest' + guestNumber;
   nickNames[socket.id] = name;
   socket.emit('nameResult', {
@@ -21,7 +22,7 @@ function joinRoom(socket, room) {
   currentRoom[socket.id] = room;
   socket.emit("joinResult", { room: room });
   socket.broadcast.to(room).emit("message", {
-    text: nickName[socket.id] + " has joined " + room + "."
+    text: nickNames[socket.id] + " has joined " + room + "."
   })
 
   var usersInRoom = io.sockets.clients(room);
@@ -44,6 +45,7 @@ function joinRoom(socket, room) {
 
 function handleNameChangeAttempts(socket, nickNames, namesUsed) {
   socket.on('nameAttempt', function(name) {
+  debugger;
     if (name.indexOf('Guest') == 0) {
       socket.emit('nameResult', {
         success: false,
@@ -60,9 +62,9 @@ function handleNameChangeAttempts(socket, nickNames, namesUsed) {
           success: true,
           name: name
         });
-        socket.broadcast.to(currentRoom[socket.id].emit('message', {
+        socket.broadcast.to(currentRoom[socket.id]).emit('message', {
           text: previousName + ' is now known as ' + name + '.'
-        }));
+        });
       } else{
         socket.emit('nameResult', {
           success:false,
@@ -91,8 +93,12 @@ function handleRoomJoining(socket){
 function handleClientDisconnection(socket){
   socket.on('disconnect', function(){
     var nameIndex = namesUsed.indexOf(nickNames[socket.id]);
+    // delete namesUsed[nameIndex];
     namesUsed.splice(nameIndex, 1);
-    nickNames.splice(socket.id, 1);
+    console.log(nickNames);
+    console.log(socket.id);
+    delete nickNames[socket.id];
+
   })
 }
 
@@ -108,7 +114,7 @@ exports.listen = function(server) {
     handleRoomJoining(socket);
 
     socket.on('rooms', function() {
-      socket.emit('rooms', io.socket.manager.rooms);
+      socket.emit('rooms', io.sockets.manager.rooms);
     });
 
     handleClientDisconnection(socket, nickNames, namesUsed);

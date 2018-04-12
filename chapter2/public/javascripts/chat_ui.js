@@ -10,7 +10,8 @@ function processUserInput(chatApp, socket){
   var message = $('#send-message').val();
   var systemMessage;
 
-  if(message.chatAt(0) === '/'){
+  if(message.charAt(0) === '/'){
+    debugger;
     systemMessage = chatApp.processCommand(message);
     if(systemMessage){
       $('#messages').append(divSystemContentElement(systemMessage));
@@ -28,7 +29,7 @@ var socket = io.connect();
 
 $(document).ready(function(){
   var chatApp = new Chat(socket);
-
+  debugger;
   socket.on('nameResult', function(result){
     var message;
 
@@ -37,12 +38,12 @@ $(document).ready(function(){
     }else{
       message = result.message;
     }
-    $('#message').append(divSystemContentElement(message));
+    $('#messages').append(divSystemContentElement(message));
   });
 
   socket.on('joinResult', function(result){
-    $('room').text(result.room);
-    $('#message').append(divSystemContentElement('Room changed.'));
+    $('#room').text(result.room);
+    $('#messages').append(divSystemContentElement('Room changed.'));
   });
 
   socket.on('message', function(message){
@@ -72,6 +73,7 @@ $(document).ready(function(){
   $('#send-message').focus();
 
   $('#send-form').submit(function(){
+    console.log('on submit');
     processUserInput(chatApp, socket);
     return false;
   });
